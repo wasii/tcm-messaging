@@ -8,19 +8,22 @@
 import Foundation
 import UIKit
 
-typealias tcm_token = ()->()
 class TCMServices: NSObject {
-    var clientID:       String?
-    var clientSecret:   String?
+    
+    var clientID:               String?
+    var clientSecret:           String?
+    
+    private var GUID:           String?
+    private var registerToken:  String?
     
     init(clientID: String, clientSecret: String) {
         super.init()
         self.clientID = clientID
         self.clientSecret = clientSecret
-        self.getToken {}
+        
+        self.getGUID()
     }
-    
-    fileprivate func getToken(completion: tcm_token) {
+    fileprivate func getGUID() {
         guard let clientID = clientID,
               let clientSecret = clientSecret else {
             return
