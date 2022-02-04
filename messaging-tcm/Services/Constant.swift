@@ -8,5 +8,5 @@
 import Foundation
 
 
-let BASEURL     = ""
-let FINALURL    = ""
+let BASEURL         = "http://localhost:8004/"
+let REGISTERURL     = BASEURL + "registerDevice"

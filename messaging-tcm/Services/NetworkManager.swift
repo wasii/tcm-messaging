@@ -22,11 +22,11 @@ class NetworkManager: NSObject {
         self.aPICalling = aPICalling
     }
     
-    func fetchData<T: Codable>(type: T.Type, onCompletion: @escaping(Result<T, APIError>) -> Void) {
-        guard let url = URL(string: FINALURL) else {
+    func fetchData<T: Codable>(type: T.Type, params: [String:Any]?, onCompletion: @escaping(Result<T, APIError>) -> Void) {
+        guard let url = URL(string: REGISTERURL) else {
             return
         }
-        self.aPICalling.callServer(url: url) { result in
+        self.aPICalling.callServer(url: url, params: params) { result in
             switch result {
             case .success(let data):
                 self.responseHandler.handleResponse(type: type, data: data) { decoded in
@@ -46,13 +46,21 @@ class NetworkManager: NSObject {
 }
 
 class APICalling {
-    func callServer(url: URL, onCompletion: @escaping(Result<Data, APIError>) -> Void) {
-        URLSession.shared.dataTask(with: url) { data, _, error in
+    func callServer(url: URL, params: [String:Any]?, onCompletion: @escaping(Result<Data, APIError>) -> Void) {
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        if let httpBody = try? JSONSerialization.data(withJSONObject: params ?? [:], options: []) {
+            request.httpBody = httpBody
+        }
+        
+        let session = URLSession.shared
+        session.dataTask(with: request) { (data, _, error) in
             guard let data = data else {
                 return onCompletion(.failure(.NoData))
             }
             onCompletion(.success(data))
-        }
+        }.resume()
     }
 }
 

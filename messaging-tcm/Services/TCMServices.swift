@@ -23,19 +23,24 @@ class TCMServices: NSObject {
         
         self.getGUID()
     }
-    fileprivate func getGUID() {
+    private func getGUID() {
         guard let clientID = clientID,
               let clientSecret = clientSecret else {
             return
         }
-        print(clientID)
-        print(clientSecret)
-        
-        NetworkManager().fetchData(type: Model.self) { result in
+        let params = [
+            "clientId" : clientID,
+            "secretKey" : clientSecret
+        ]
+        NetworkManager().fetchData(type: TokenModel.self, params: params) { result in
             switch result {
-            case .success(_):
+            case .success(let token_model):
+                self.registerToken = token_model.returnStatus.tcmToken
+                print(token_model.returnStatus.tcmToken)
                 break
-            case .failure(_):
+            case .failure(.NoData):
+                break
+            case .failure(.DecodingError):
                 break
             }
         }
