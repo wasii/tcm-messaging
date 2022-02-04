@@ -21,9 +21,13 @@ class TCMServices: NSObject {
         self.clientID = clientID
         self.clientSecret = clientSecret
         
-        self.getGUID()
+        self.getGUID { granted in
+            if granted {
+                self.registerUser()
+            }
+        }
     }
-    private func getGUID() {
+    private func getGUID(_ completion: @escaping (Bool)->()) {
         guard let clientID = clientID,
               let clientSecret = clientSecret else {
             return
@@ -36,7 +40,7 @@ class TCMServices: NSObject {
             switch result {
             case .success(let token_model):
                 self.registerToken = token_model.returnStatus.tcmToken
-                print(token_model.returnStatus.tcmToken)
+                completion(true)
                 break
             case .failure(.NoData):
                 break
@@ -44,5 +48,12 @@ class TCMServices: NSObject {
                 break
             }
         }
+    }
+    
+    private func registerUser() {
+        guard let registerToken = registerToken else {
+            return
+        }
+        print(registerToken)
     }
 }
