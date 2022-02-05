@@ -12,6 +12,11 @@ enum APIError: Error {
     case DecodingError
     case NoData
 }
+enum RequestType: String {
+    case get    = "GET"
+    case post   = "POST"
+}
+
 class NetworkManager: NSObject {
     let aPICalling:      APICalling
     let responseHandler: ResponseHandler
@@ -22,11 +27,11 @@ class NetworkManager: NSObject {
         self.aPICalling = aPICalling
     }
     
-    func fetchData<T: Codable>(type: T.Type, params: [String:Any]?, onCompletion: @escaping(Result<T, APIError>) -> Void) {
-        guard let url = URL(string: REGISTERURL) else {
+    func fetchData<T: Codable>(url: String, requesttype: RequestType, type: T.Type, params: [String:Any]?, onCompletion: @escaping(Result<T, APIError>) -> Void) {
+        guard let url = URL(string: url) else {
             return
         }
-        self.aPICalling.callServer(url: url, params: params) { result in
+        self.aPICalling.callServer(url: url, requesttype: requesttype, params: params) { result in
             switch result {
             case .success(let data):
                 self.responseHandler.handleResponse(type: type, data: data) { decoded in
@@ -46,9 +51,14 @@ class NetworkManager: NSObject {
 }
 
 class APICalling {
-    func callServer(url: URL, params: [String:Any]?, onCompletion: @escaping(Result<Data, APIError>) -> Void) {
+    func callServer(url: URL, requesttype:RequestType, params: [String:Any]?, onCompletion: @escaping(Result<Data, APIError>) -> Void) {
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        switch requesttype {
+        case .get:
+            request.httpMethod = "GET"
+        case .post:
+            request.httpMethod = "POST"
+        }
         request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
         if let httpBody = try? JSONSerialization.data(withJSONObject: params ?? [:], options: []) {
             request.httpBody = httpBody

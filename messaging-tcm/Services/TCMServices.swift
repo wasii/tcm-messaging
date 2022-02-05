@@ -36,7 +36,7 @@ class TCMServices: NSObject {
             "clientId" : clientID,
             "secretKey" : clientSecret
         ]
-        NetworkManager().fetchData(type: TokenModel.self, params: params) { result in
+        NetworkManager().fetchData(url: REGISTERURL, requesttype: .post, type: TokenModel.self, params: params) { result in
             switch result {
             case .success(let token_model):
                 self.registerToken = token_model.returnStatus.tcmToken
